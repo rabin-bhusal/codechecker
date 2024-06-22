@@ -1,0 +1,30 @@
+def radiomertic_calibration( band, reflectance_mult, reflectance_add, sun_elevation):
+#converti sun elevation to radians at first
+ sun_elevation_rad=np.radians(sun_elevation)
+#calculating TOA reflectance
+calibrated_band=(reflectance_mult*band+reflectance_add)/np.sin(sun_elevation_rad)
+return calibrated_band
+reflectance_mult=2.0000E-05
+reflectance_add=-0.10000
+sun_elevation=43.00751079
+#now loading a band
+band_path='D:/7th sem/gis with python/rabin/raster_work_python/LC08_L1TP_142040_20221102_20221114_02_T1_B2_TIF'
+with rasterio.open(band_path)as src:
+    band=src.read(1)
+    calibrated_path=radiomentric_calibratiom(band,reflectance_mult,reflectance_add,sun_elevation)
+    #now displaying the calibrated band
+    import matplotlib.pyplot as plt
+    plt.imshow(calibrated_band,cmap='gray')
+    plt.colorbar()
+    plt.title('Calibrated TOA Reflectance')
+    plt.show()
+    output_path='D:\7th sem\gis with python\rabin\raster_work_python\raster_try'
+    with rasterio.open(
+        output_path,'w', driver='GTiff',
+        height=calibrated_band.shape[0],
+        width=calibrated_band.shape[1],
+        count=1,
+        dtype=calibrated_band.dtype,
+        crs=src.crs,
+        transform=src.transform,)as dst:
+        dst.write(calibrated_band,1)
